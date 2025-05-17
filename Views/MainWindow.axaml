@@ -15,7 +15,38 @@
     </Design.DataContext>
 
     <DockPanel>
-        <views:DirectoryView />
+        <WrapPanel>
+            <ItemsControl ItemsSource="{Binding Directories}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="5">
+                            <Image Source="/Assets/folder_icon.png" Width="64" Height="64" />
+                            <TextBlock MaxWidth="64" Text="{Binding Name}" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ItemsControl ItemsSource="{Binding Files}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="5">
+                            <Image Source="/Assets/file_icon.png" Width="64" Height="64" />
+                            <TextBlock MaxWidth="64" Text="{Binding Name}" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </WrapPanel>
     </DockPanel>
 
 </Window>
