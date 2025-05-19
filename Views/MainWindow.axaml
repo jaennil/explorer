@@ -25,12 +25,27 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Margin="5">
-                            <Image Source="/Assets/folder_icon.png" Width="64" Height="64" />
-                            <TextBlock MaxWidth="64" Text="{Binding Name}" HorizontalAlignment="Center" />
+                            <Border Background="LightYellow" BorderBrush="Gold" BorderThickness="8" CornerRadius="8" Padding="10"
+                                                                                                        Width="128" Height="128">
+                                <ItemsControl ItemsSource="{Binding Images}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Columns="2" Rows="2" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Image Source="{Binding}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Border>
+                            <TextBlock MaxWidth="128" Text="{Binding Name}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+            <!--
             <ItemsControl ItemsSource="{Binding Files}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -46,6 +61,7 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+            -->
         </WrapPanel>
     </DockPanel>
 

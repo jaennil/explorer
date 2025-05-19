@@ -33,27 +33,18 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _currentPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        Console.WriteLine($"_currentPath: {_currentPath}");
-
         var dirs = Directory.EnumerateDirectories(_currentPath);
-
-        Console.WriteLine($"dirs: {dirs}");
 
         foreach (var dirPath in dirs)
         {
-            Console.WriteLine($"dirPath: {dirPath}");
             var dirInfo = new DirectoryInfo(dirPath);
-            Console.WriteLine($"dirInfo: {dirInfo}");
             _directories.Add(dirInfo);
         }
 
         var files = Directory.EnumerateFiles(_currentPath);
 
-        Console.WriteLine($"files: {files}");
-
         foreach (var filePath in files)
         {
-            Console.WriteLine($"filePath: {filePath}");
             var fileInfo = new FileInfo(filePath);
             _files.Add(fileInfo);
         }
