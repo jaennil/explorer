@@ -1,21 +1,29 @@
-﻿using System.IO;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
+using System.IO;
 
 namespace explorer.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private string _currentPath = @"~";
-    private ObservableCollection<DirectoryInfo> _directories = [];
-    public ObservableCollection<DirectoryInfo> Directories
+    private string _currentPath;
+    public string CurrentPath
     {
-        get => _directories;
+        get => _currentPath;
         private set
         {
-            _directories = value;
-            OnPropertyChanged();
+            if (SetProperty(ref _currentPath, value))
+            {
+                UpdateDirectories();
+            }
         }
+    }
+    
+    private ObservableCollection<Models.Directory> _directories = [];
+    public ObservableCollection<Models.Directory> Directories
+    {
+        get => _directories;
+        private set => SetProperty(ref _directories, value);
     }
 
     private ObservableCollection<FileInfo> _files = [];
@@ -31,22 +39,54 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
-        _currentPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        CurrentPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        var dirs = Directory.EnumerateDirectories(_currentPath);
-
-        foreach (var dirPath in dirs)
-        {
-            var dirInfo = new DirectoryInfo(dirPath);
-            _directories.Add(dirInfo);
-        }
-
-        var files = Directory.EnumerateFiles(_currentPath);
-
+        var files = Directory.EnumerateFiles(CurrentPath);
         foreach (var filePath in files)
         {
             var fileInfo = new FileInfo(filePath);
             _files.Add(fileInfo);
         }
+    }
+
+    private void UpdateDirectories()
+    {
+        _directories.Clear();
+        
+        var dirs = Directory.EnumerateDirectories(CurrentPath);
+        foreach (var dirPath in dirs)
+        {
+            var dir = new Models.Directory(dirPath);
+            _directories.Add(dir);
+        }
+    }
+
+    private void UpdateFiles()
+    {
+        _files.Clear();
+        var files = Directory.EnumerateFiles(CurrentPath);
+        foreach (var filePath in files)
+        {
+            var fileInfo = new FileInfo(filePath);
+            _files.Add(fileInfo);
+        }
+    }
+
+    public void GoToDirectory(Models.Directory directory)
+    {
+        CurrentPath = directory.Info.FullName;
+        UpdateDirectories();
+    }
+
+    public void Back()
+    {
+        var parent = Path.GetDirectoryName(CurrentPath);
+        if (parent == null)
+        {
+            Console.WriteLine("No directory upper");
+            return;
+        }
+        
+        CurrentPath = parent;
     }
 }

@@ -3,7 +3,6 @@
         xmlns:vm="using:explorer.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:views="clr-namespace:explorer.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="explorer.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -15,6 +14,21 @@
     </Design.DataContext>
 
     <DockPanel>
+        <Border DockPanel.Dock="Top" BorderBrush="Black" BorderThickness="1">
+            <StackPanel Orientation="Horizontal">
+                <Button Click="Button_OnClick">Back</Button>
+                <TextBlock Text="{Binding CurrentPath}"/>
+            </StackPanel>
+        </Border>
+        <Border DockPanel.Dock="Left" BorderBrush="Black" BorderThickness="1">
+            <StackPanel>
+                <Button>TODO</Button>
+                <Button>TODO</Button>
+                <Button>TODO</Button>
+                <Button>TODO</Button>
+                <Button>TODO</Button>
+            </StackPanel>
+        </Border>
         <WrapPanel>
             <ItemsControl ItemsSource="{Binding Directories}">
                 <ItemsControl.ItemsPanel>
@@ -25,8 +39,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Margin="5">
-                            <Border Background="LightYellow" BorderBrush="Gold" BorderThickness="8" CornerRadius="8" Padding="10"
-                                                                                                        Width="128" Height="128">
+                            <Border Tag="{Binding}" Background="LightYellow" BorderBrush="Gold" BorderThickness="8" CornerRadius="8" Padding="10" Width="128" Height="128" PointerPressed="InputElement_OnPointerPressed">
                                 <ItemsControl ItemsSource="{Binding Images}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -35,17 +48,17 @@
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Image Source="{Binding}" />
+                                            <Image Source="{Binding}">
+                                            </Image>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </Border>
-                            <TextBlock MaxWidth="128" Text="{Binding Name}" HorizontalAlignment="Center" />
+                            <TextBlock MaxWidth="128" Text="{Binding Info.Name}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <!--
             <ItemsControl ItemsSource="{Binding Files}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -55,13 +68,12 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Margin="5">
-                            <Image Source="/Assets/file_icon.png" Width="64" Height="64" />
-                            <TextBlock MaxWidth="64" Text="{Binding Name}" HorizontalAlignment="Center" />
+                            <Image Source="/Assets/file_icon.png" Width="128" Height="128" />
+                            <TextBlock MaxWidth="128" Text="{Binding Name}" HorizontalAlignment="Center" />
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-            -->
         </WrapPanel>
     </DockPanel>
 

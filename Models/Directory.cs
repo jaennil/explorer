@@ -1,35 +1,38 @@
 using System.Collections.ObjectModel;
 using Avalonia.Media.Imaging;
+using System;
 
-namespace exlorer.Models;
+namespace explorer.Models;
 
 public class Directory
 {
-    private System.IO.DirectoryInfo _info;
-    private Bitmap _source;
-    private ObservableCollection<Bitmap> _images;
+    public System.IO.DirectoryInfo Info { get; }
+    private ObservableCollection<Bitmap> _images = [];
     public ObservableCollection<Bitmap> Images => _images;
-    public string Name => _info.Name;
-    private string[] supportedImageExtensions = ["jpg", "webp"];
+    // TODO: add .webp
+    private string[] supportedImageExtensions = [".jpg", ".png", ".jpeg"];
 
     public Directory(string path)
     {
-        _info = new System.IO.DirectoryInfo(path);
+        Info = new System.IO.DirectoryInfo(path);
+        loadImages();
     }
 
     private void loadImages()
     {
         var count = 0;
-        var files = System.IO.Directory.EnumerateFiles(_info.FullName);
+        var files = System.IO.Directory.EnumerateFiles(Info.FullName);
         foreach (var filePath in files)
         {
-            var uri = new Uri(filePath);
-            var extension = uri.Extension;
-            if (supportedImageExtensions.Contains(extension))
+            var extension = System.IO.Path.GetExtension(filePath);
+
+            if (Array.Exists(supportedImageExtensions, ext => ext == extension))
             {
                 count++;
-                _images.Add(new Bitmap(filepath));
+                var bitmap = new Bitmap(filePath);
+                _images.Add(bitmap);
             }
+
             if (count == 4)
             {
                 return;
