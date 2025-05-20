@@ -1,81 +1,123 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace explorer.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private string _currentPath;
-    public string CurrentPath
+    private string _currentPath = string.Empty;
+    private string CurrentPath
     {
         get => _currentPath;
-        private set
+        set
         {
-            if (SetProperty(ref _currentPath, value))
-            {
-                UpdateDirectories();
-            }
+            if (!SetProperty(ref _currentPath, value)) return;
+            UpdateFileSystemEntries();
         }
-    }
-    
-    private ObservableCollection<Models.Directory> _directories = [];
-    public ObservableCollection<Models.Directory> Directories
-    {
-        get => _directories;
-        private set => SetProperty(ref _directories, value);
     }
 
-    private ObservableCollection<FileInfo> _files = [];
-    public ObservableCollection<FileInfo> Files
-    {
-        get => _files;
-        private set
-        {
-            _files = value;
-            OnPropertyChanged();
-        }
-    }
+    [ObservableProperty]
+    private bool _imagesOnly = true;
+
+    public int DirectoriesAmount { get; private set; }
+
+    public int FilesAmount { get; private set; }
+
+    public int FilesystemEntriesAmount { get; private set; }
+
+    private List<FileInfo> _files = [];
+
+    private List<Models.Directory> _directories = [];
+
+    public ObservableCollection<string> CurrentPathParts { get; }
+
+    [ObservableProperty]
+    private ObservableCollection<object> _fileSystemEntries = [];
 
     public MainWindowViewModel()
     {
         CurrentPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
-        var files = Directory.EnumerateFiles(CurrentPath);
-        foreach (var filePath in files)
-        {
-            var fileInfo = new FileInfo(filePath);
-            _files.Add(fileInfo);
-        }
+        var pathSeparatorChar = Path.DirectorySeparatorChar;
+        var pathParts = CurrentPath.Split(pathSeparatorChar);
+        pathParts[0] = pathSeparatorChar.ToString();
+        CurrentPathParts = new ObservableCollection<string>(pathParts);
     }
 
-    private void UpdateDirectories()
+    private void UpdateFileSystemEntries()
     {
-        _directories.Clear();
-        
+        FileSystemEntries.Clear();
+        DirectoriesAmount = 0;
+        FilesAmount = 0;
+
         var dirs = Directory.EnumerateDirectories(CurrentPath);
         foreach (var dirPath in dirs)
         {
             var dir = new Models.Directory(dirPath);
-            _directories.Add(dir);
+            FileSystemEntries.Add(dir);
+            DirectoriesAmount++;
         }
-    }
 
-    private void UpdateFiles()
-    {
-        _files.Clear();
         var files = Directory.EnumerateFiles(CurrentPath);
         foreach (var filePath in files)
         {
             var fileInfo = new FileInfo(filePath);
-            _files.Add(fileInfo);
+            if (ImagesOnly)
+            {
+                var extension = Path.GetExtension(filePath);
+                if (!Models.Directory.SupportedImageExtensions.Contains(extension)) continue;
+                FileSystemEntries.Add(fileInfo);
+                FilesAmount++;
+            }
+            else
+            {
+                FileSystemEntries.Add(fileInfo);
+                FilesAmount++;
+            }
+
         }
+
+        FilesystemEntriesAmount = FileSystemEntries.Count;
+    }
+
+    private void UpdateFiles()
+    {
+        var files = Directory.EnumerateFiles(CurrentPath);
+        List<FileInfo> newFiles = [];
+        foreach (var filePath in files)
+        {
+            var fileInfo = new FileInfo(filePath);
+            if (ImagesOnly)
+            {
+                var extension = Path.GetExtension(filePath);
+                if (!Models.Directory.SupportedImageExtensions.Contains(extension)) continue;
+                newFiles.Add(fileInfo);
+            }
+            else
+            {
+                newFiles.Add(fileInfo);
+            }
+        }
+
+        _files = newFiles;
+        FilesAmount = newFiles.Count;
+        OnPropertyChanged();
+    }
+
+    private void UpdateDirectories()
+    {
+        _directories = Directory.EnumerateDirectories(CurrentPath)
+            .Select(dir => new Models.Directory(dir))
+            .ToList();
     }
 
     public void GoToDirectory(Models.Directory directory)
     {
         CurrentPath = directory.Info.FullName;
-        UpdateDirectories();
+        UpdateFileSystemEntries();
     }
 
     public void Back()

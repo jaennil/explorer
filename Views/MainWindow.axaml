@@ -3,6 +3,8 @@
         xmlns:vm="using:explorer.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:models="clr-namespace:explorer.Models"
+        xmlns:sys="clr-namespace:System.IO;assembly=System.Runtime"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="explorer.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -14,12 +16,35 @@
     </Design.DataContext>
 
     <DockPanel>
+
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="_Images only" ToggleType="CheckBox" IsChecked="{Binding ImagesOnly}" />
+            </MenuItem>
+        </Menu>
+
         <Border DockPanel.Dock="Top" BorderBrush="Black" BorderThickness="1">
             <StackPanel Orientation="Horizontal">
                 <Button Click="Button_OnClick">Back</Button>
-                <TextBlock Text="{Binding CurrentPath}"/>
+                <!-- Current Path -->
+                <ItemsControl ItemsSource="{Binding CurrentPathParts}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                        <!-- TODO: tag with full path -->
+                            <Button Content="{Binding}" Click="Button_Path_OnClick"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </StackPanel>
         </Border>
+
         <Border DockPanel.Dock="Left" BorderBrush="Black" BorderThickness="1">
             <StackPanel>
                 <Button>TODO</Button>
@@ -29,52 +54,65 @@
                 <Button>TODO</Button>
             </StackPanel>
         </Border>
-        <WrapPanel>
-            <ItemsControl ItemsSource="{Binding Directories}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Margin="5">
-                            <Border Tag="{Binding}" Background="LightYellow" BorderBrush="Gold" BorderThickness="8" CornerRadius="8" Padding="10" Width="128" Height="128" PointerPressed="InputElement_OnPointerPressed">
-                                <ItemsControl ItemsSource="{Binding Images}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <UniformGrid Columns="2" Rows="2" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Image Source="{Binding}">
-                                            </Image>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </Border>
-                            <TextBlock MaxWidth="128" Text="{Binding Info.Name}" HorizontalAlignment="Center" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <ItemsControl ItemsSource="{Binding Files}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Margin="5">
-                            <Image Source="/Assets/file_icon.png" Width="128" Height="128" />
-                            <TextBlock MaxWidth="128" Text="{Binding Name}" HorizontalAlignment="Center" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </WrapPanel>
-    </DockPanel>
 
+        <Border BorderBrush="Black" BorderThickness="1" DockPanel.Dock="Bottom">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Text="{Binding DirectoriesAmount, StringFormat=Папок: {0}}" />
+                <Separator />
+                <TextBlock Text="{Binding FilesAmount, StringFormat=Файлов: {0}}" />
+                <Separator />
+                <TextBlock Text="{Binding FilesystemEntriesAmount, StringFormat=Всего: {0}}" />
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer>
+            <ItemsControl ItemsSource="{Binding FileSystemEntries}">
+
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ContentControl Content="{Binding}">
+                            <ContentControl.DataTemplates>
+
+                                <!-- Directory Template -->
+                                <DataTemplate DataType="{x:Type models:Directory}">
+                                    <StackPanel Margin="5">
+                                        <Border Tag="{Binding}" Background="LightYellow" BorderBrush="Gold" BorderThickness="8" CornerRadius="8" Padding="10" Width="128" Height="128" PointerPressed="InputElement_OnPointerPressed">
+                                            <ItemsControl ItemsSource="{Binding Images}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <UniformGrid Columns="2" Rows="2" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Image Source="{Binding}" />
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </Border>
+                                        <TextBlock MaxWidth="128" Text="{Binding Info.Name}" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </DataTemplate>
+
+                                <!-- File Template -->
+                                <DataTemplate DataType="{x:Type sys:FileInfo}">
+                                    <StackPanel Margin="5">
+                                        <Image Source="/Assets/file_icon.png" Width="128" Height="128" />
+                                        <TextBlock MaxWidth="128" Text="{Binding Name}" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ContentControl.DataTemplates>
+                        </ContentControl>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+    </DockPanel>
 </Window>

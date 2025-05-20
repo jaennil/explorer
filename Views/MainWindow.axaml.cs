@@ -28,4 +28,9 @@ public partial class MainWindow : Window
     {
         ViewModel.Back();
     }
+
+    private void Button_Path_OnClick(object? sender, RoutedEventArgs e)
+    {
+        // if (sender is Button {})
+    }
 }

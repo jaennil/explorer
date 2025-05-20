@@ -7,18 +7,18 @@ namespace explorer.Models;
 public class Directory
 {
     public System.IO.DirectoryInfo Info { get; }
-    private ObservableCollection<Bitmap> _images = [];
-    public ObservableCollection<Bitmap> Images => _images;
-    // TODO: add .webp
-    private string[] supportedImageExtensions = [".jpg", ".png", ".jpeg"];
+    public ObservableCollection<Bitmap> Images { get; } = [];
+
+    // TODO: add other extensions
+    public static string[] SupportedImageExtensions { get; } = [".jpg", ".png", ".jpeg"];
 
     public Directory(string path)
     {
         Info = new System.IO.DirectoryInfo(path);
-        loadImages();
+        LoadImages();
     }
 
-    private void loadImages()
+    private void LoadImages()
     {
         var count = 0;
         var files = System.IO.Directory.EnumerateFiles(Info.FullName);
@@ -26,11 +26,11 @@ public class Directory
         {
             var extension = System.IO.Path.GetExtension(filePath);
 
-            if (Array.Exists(supportedImageExtensions, ext => ext == extension))
+            if (Array.Exists(SupportedImageExtensions, ext => ext == extension))
             {
                 count++;
                 var bitmap = new Bitmap(filePath);
-                _images.Add(bitmap);
+                Images.Add(bitmap);
             }
 
             if (count == 4)
