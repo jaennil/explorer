@@ -21,15 +21,16 @@
             <MenuItem Header="_File">
             </MenuItem>
             <MenuItem Header="_View">
-                <MenuItem Header="_Images only" ToggleType="CheckBox" IsChecked="{Binding ImagesOnly}" />
+                <MenuItem Header="_Images only" ToggleType="CheckBox" IsChecked="{CompiledBinding ImagesOnly, Mode=TwoWay}" />
             </MenuItem>
         </Menu>
 
         <Border DockPanel.Dock="Top" BorderBrush="Black" BorderThickness="1">
             <StackPanel Orientation="Horizontal">
-                <Button Click="Button_OnClick">Back</Button>
+                <Button x:Name="BackButton" Content="Back" />
+                <Separator />
                 <!-- Current Path -->
-                <ItemsControl ItemsSource="{Binding CurrentPathParts}">
+                <ItemsControl ItemsSource="{CompiledBinding CurrentPathParts}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Horizontal" />
@@ -38,7 +39,7 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                         <!-- TODO: tag with full path -->
-                            <Button Content="{Binding}" Click="Button_Path_OnClick"/>
+                            <Button Content="{CompiledBinding}" Click="Button_Path_OnClick"/>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -57,16 +58,16 @@
 
         <Border BorderBrush="Black" BorderThickness="1" DockPanel.Dock="Bottom">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock Text="{Binding DirectoriesAmount, StringFormat=Папок: {0}}" />
+                <TextBlock Text="{CompiledBinding DirectoriesAmount, StringFormat=Папок: {0}}" />
                 <Separator />
-                <TextBlock Text="{Binding FilesAmount, StringFormat=Файлов: {0}}" />
+                <TextBlock Text="{CompiledBinding FilesAmount, StringFormat=Файлов: {0}}" />
                 <Separator />
-                <TextBlock Text="{Binding FilesystemEntriesAmount, StringFormat=Всего: {0}}" />
+                <TextBlock Text="{CompiledBinding FilesystemEntriesAmount, StringFormat=Всего: {0}}" />
             </StackPanel>
         </Border>
 
         <ScrollViewer>
-            <ItemsControl ItemsSource="{Binding FileSystemEntries}">
+            <ItemsControl ItemsSource="{CompiledBinding FileSystemEntries}">
 
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -76,14 +77,14 @@
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <ContentControl Content="{Binding}">
+                        <ContentControl Content="{CompiledBinding}">
                             <ContentControl.DataTemplates>
 
                                 <!-- Directory Template -->
                                 <DataTemplate DataType="{x:Type models:Directory}">
                                     <StackPanel Margin="5">
-                                        <Border Tag="{Binding}" Background="LightYellow" BorderBrush="Gold" BorderThickness="8" CornerRadius="8" Padding="10" Width="128" Height="128" PointerPressed="InputElement_OnPointerPressed">
-                                            <ItemsControl ItemsSource="{Binding Images}">
+                                        <Border Tag="{CompiledBinding}" Background="LightYellow" BorderBrush="Gold" BorderThickness="8" CornerRadius="8" Padding="10" Width="128" Height="128" PointerPressed="InputElement_OnPointerPressed">
+                                            <ItemsControl ItemsSource="{CompiledBinding Images}">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
                                                         <UniformGrid Columns="2" Rows="2" />
@@ -91,12 +92,12 @@
                                                 </ItemsControl.ItemsPanel>
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <Image Source="{Binding}" />
+                                                        <Image Source="{CompiledBinding}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality" />
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
                                         </Border>
-                                        <TextBlock MaxWidth="128" Text="{Binding Info.Name}" HorizontalAlignment="Center" />
+                                        <TextBlock MaxWidth="128" Text="{CompiledBinding Info.Name}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </DataTemplate>
 
@@ -104,7 +105,7 @@
                                 <DataTemplate DataType="{x:Type sys:FileInfo}">
                                     <StackPanel Margin="5">
                                         <Image Source="/Assets/file_icon.png" Width="128" Height="128" />
-                                        <TextBlock MaxWidth="128" Text="{Binding Name}" HorizontalAlignment="Center" />
+                                        <TextBlock MaxWidth="128" Text="{CompiledBinding Name}" HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </DataTemplate>
                             </ContentControl.DataTemplates>

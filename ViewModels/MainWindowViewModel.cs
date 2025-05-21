@@ -3,90 +3,119 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using CommunityToolkit.Mvvm.ComponentModel;
+using System.Reactive;
+using System.Reactive.Disposables;
+using DynamicData;
+using ReactiveUI;
 
 namespace explorer.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase
+public class MainWindowViewModel : ViewModelBase, IActivatableViewModel
 {
+    private readonly SourceList<object> _fileSystemEntriesSource = new();
     private string _currentPath = string.Empty;
-    private string CurrentPath
+    private bool _imagesOnly = true;
+    private int _fileSystemEntriesAmount;
+    private int _directoriesAmount;
+    private int _filesAmount;
+    private readonly List<FileInfo> _files = [];
+    private List<Models.Directory> _directories = [];
+    private ObservableCollection<object> _fileSystemEntries = [];
+
+    public string CurrentPath
     {
         get => _currentPath;
         set
         {
-            if (!SetProperty(ref _currentPath, value)) return;
+            _currentPath = value;
             UpdateFileSystemEntries();
+            // UpadteCurrentFileParts();
         }
     }
 
-    [ObservableProperty]
-    private bool _imagesOnly = true;
+    public bool ImagesOnly
+    {
+        get => _imagesOnly;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _imagesOnly, value);
+            UpdateFiles();
+            MergeFoldersAndFiles();
+        }
+    }
 
-    public int DirectoriesAmount { get; private set; }
+    public int DirectoriesAmount
+    {
+        get => _directoriesAmount;
+        private set => this.RaiseAndSetIfChanged(ref _directoriesAmount, value);
+    }
 
-    public int FilesAmount { get; private set; }
+    public int FilesAmount
+    {
+        get => _filesAmount;
+        private set => this.RaiseAndSetIfChanged(ref _filesAmount, value);
+    }
 
-    public int FilesystemEntriesAmount { get; private set; }
+    public int FilesystemEntriesAmount
+    {
+        get => _fileSystemEntriesAmount;
+        private set => this.RaiseAndSetIfChanged(ref _fileSystemEntriesAmount, value);
+    }
 
-    private List<FileInfo> _files = [];
+    public ObservableCollection<string> CurrentPathParts { get; private set; }
 
-    private List<Models.Directory> _directories = [];
+    public ObservableCollection<object> FileSystemEntries
+    {
+        get => _fileSystemEntries;
+        private set => this.RaiseAndSetIfChanged(ref _fileSystemEntries, value);
+    }
 
-    public ObservableCollection<string> CurrentPathParts { get; }
+    public ReactiveCommand<Unit, Unit> BackCommand { get; }
 
-    [ObservableProperty]
-    private ObservableCollection<object> _fileSystemEntries = [];
+    public ViewModelActivator Activator { get; } = new();
 
     public MainWindowViewModel()
     {
         CurrentPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        // TODO: UpdateCurrentPathParts();
         var pathSeparatorChar = Path.DirectorySeparatorChar;
         var pathParts = CurrentPath.Split(pathSeparatorChar);
         pathParts[0] = pathSeparatorChar.ToString();
         CurrentPathParts = new ObservableCollection<string>(pathParts);
+
+        BackCommand = ReactiveCommand.Create(Back);
+
+        this.WhenActivated(disposables =>
+        {
+            Disposable.Create(() => _fileSystemEntriesSource.Dispose()).DisposeWith(disposables);
+        });
+    }
+
+    private void MergeFoldersAndFiles()
+    {
+        _fileSystemEntries.Clear();
+        foreach (var dir in _directories)
+        {
+            _fileSystemEntries.Add(dir);
+        }
+        foreach (var file in _files)
+        {
+            _fileSystemEntries.Add(file);
+        }
+        FilesystemEntriesAmount = FilesAmount + DirectoriesAmount;
     }
 
     private void UpdateFileSystemEntries()
     {
-        FileSystemEntries.Clear();
-        DirectoriesAmount = 0;
-        FilesAmount = 0;
-
-        var dirs = Directory.EnumerateDirectories(CurrentPath);
-        foreach (var dirPath in dirs)
-        {
-            var dir = new Models.Directory(dirPath);
-            FileSystemEntries.Add(dir);
-            DirectoriesAmount++;
-        }
-
-        var files = Directory.EnumerateFiles(CurrentPath);
-        foreach (var filePath in files)
-        {
-            var fileInfo = new FileInfo(filePath);
-            if (ImagesOnly)
-            {
-                var extension = Path.GetExtension(filePath);
-                if (!Models.Directory.SupportedImageExtensions.Contains(extension)) continue;
-                FileSystemEntries.Add(fileInfo);
-                FilesAmount++;
-            }
-            else
-            {
-                FileSystemEntries.Add(fileInfo);
-                FilesAmount++;
-            }
-
-        }
-
-        FilesystemEntriesAmount = FileSystemEntries.Count;
+        UpdateDirectories();
+        UpdateFiles();
+        MergeFoldersAndFiles();
     }
 
     private void UpdateFiles()
     {
+        _files.Clear();
         var files = Directory.EnumerateFiles(CurrentPath);
-        List<FileInfo> newFiles = [];
         foreach (var filePath in files)
         {
             var fileInfo = new FileInfo(filePath);
@@ -94,17 +123,14 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 var extension = Path.GetExtension(filePath);
                 if (!Models.Directory.SupportedImageExtensions.Contains(extension)) continue;
-                newFiles.Add(fileInfo);
+                _files.Add(fileInfo);
             }
             else
             {
-                newFiles.Add(fileInfo);
+                _files.Add(fileInfo);
             }
         }
-
-        _files = newFiles;
-        FilesAmount = newFiles.Count;
-        OnPropertyChanged();
+        FilesAmount = _files.Count;
     }
 
     private void UpdateDirectories()
@@ -112,6 +138,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _directories = Directory.EnumerateDirectories(CurrentPath)
             .Select(dir => new Models.Directory(dir))
             .ToList();
+        DirectoriesAmount = _directories.Count;
     }
 
     public void GoToDirectory(Models.Directory directory)
@@ -123,12 +150,9 @@ public partial class MainWindowViewModel : ViewModelBase
     public void Back()
     {
         var parent = Path.GetDirectoryName(CurrentPath);
-        if (parent == null)
+        if (!string.IsNullOrEmpty(parent))
         {
-            Console.WriteLine("No directory upper");
-            return;
+            CurrentPath = parent;
         }
-        
-        CurrentPath = parent;
     }
 }

@@ -1,10 +1,12 @@
 using System.Collections.ObjectModel;
 using Avalonia.Media.Imaging;
+using System.Linq;
 using System;
+using ReactiveUI;
 
 namespace explorer.Models;
 
-public class Directory
+public class Directory : ReactiveObject
 {
     public System.IO.DirectoryInfo Info { get; }
     public ObservableCollection<Bitmap> Images { get; } = [];
@@ -20,23 +22,14 @@ public class Directory
 
     private void LoadImages()
     {
-        var count = 0;
-        var files = System.IO.Directory.EnumerateFiles(Info.FullName);
-        foreach (var filePath in files)
+        var imageFiles = Info.EnumerateFiles()
+            .Where(f => SupportedImageExtensions.Contains(f.Extension.ToLowerInvariant()))
+            .Take(4);
+
+        foreach (var file in imageFiles)
         {
-            var extension = System.IO.Path.GetExtension(filePath);
-
-            if (Array.Exists(SupportedImageExtensions, ext => ext == extension))
-            {
-                count++;
-                var bitmap = new Bitmap(filePath);
-                Images.Add(bitmap);
-            }
-
-            if (count == 4)
-            {
-                return;
-            }
+            var bitmap = new Bitmap(file.FullName);
+            Images.Add(bitmap);
         }
     }
 }

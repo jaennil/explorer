@@ -1,19 +1,27 @@
-using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.ReactiveUI;
 using explorer.Models;
 using explorer.ViewModels;
+using ReactiveUI;
+using System.Reactive.Disposables;
 
 namespace explorer.Views;
 
-public partial class MainWindow : Window
+public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
-    private MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext;
     public MainWindow()
     {
         InitializeComponent();
-        DataContext = new MainWindowViewModel();
+
+        this.WhenActivated(disposables =>
+        {
+            this.BindCommand(ViewModel,
+                    vm => vm.BackCommand,
+                    v => v.BackButton)
+                .DisposeWith(disposables);
+        });
     }
 
     private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)
@@ -22,11 +30,6 @@ public partial class MainWindow : Window
         {
             ViewModel.GoToDirectory(directory);
         }
-    }
-
-    private void Button_OnClick(object? sender, RoutedEventArgs e)
-    {
-        ViewModel.Back();
     }
 
     private void Button_Path_OnClick(object? sender, RoutedEventArgs e)
