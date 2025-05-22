@@ -1,119 +1,29 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:explorer.ViewModels"
+        xmlns:vm="using:explorer_async.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:models="clr-namespace:explorer.Models"
-        xmlns:sys="clr-namespace:System.IO;assembly=System.Runtime"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="explorer.Views.MainWindow"
+        x:Class="explorer_async.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="explorer">
+        Title="explorer_async">
 
     <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <DockPanel>
+    <ListBox ItemsSource="{CompiledBinding Files}" Margin="5">
+        <ListBox.ItemTemplate>
+            <DataTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <Image Source="/Assets/avalonia-logo.ico" Width="64" Height="64"/>
+                    <TextBlock Text="{CompiledBinding}" VerticalAlignment="Center"/>
+                </StackPanel>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+    </ListBox>
 
-        <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_File">
-            </MenuItem>
-            <MenuItem Header="_View">
-                <MenuItem Header="_Images only" ToggleType="CheckBox" IsChecked="{CompiledBinding ImagesOnly, Mode=TwoWay}" />
-            </MenuItem>
-        </Menu>
-
-        <Border DockPanel.Dock="Top" BorderBrush="Black" BorderThickness="1">
-            <StackPanel Orientation="Horizontal">
-                <Button x:Name="BackButton" Content="Back" />
-                <Separator />
-                <!-- Current Path -->
-                <ItemsControl ItemsSource="{CompiledBinding CurrentPathParts}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                        <!-- TODO: tag with full path -->
-                            <Button Content="{CompiledBinding}" Click="Button_Path_OnClick"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
-        </Border>
-
-        <Border DockPanel.Dock="Left" BorderBrush="Black" BorderThickness="1">
-            <StackPanel>
-                <Button>TODO</Button>
-                <Button>TODO</Button>
-                <Button>TODO</Button>
-                <Button>TODO</Button>
-                <Button>TODO</Button>
-            </StackPanel>
-        </Border>
-
-        <Border BorderBrush="Black" BorderThickness="1" DockPanel.Dock="Bottom">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock Text="{CompiledBinding DirectoriesAmount, StringFormat=Папок: {0}}" />
-                <Separator />
-                <TextBlock Text="{CompiledBinding FilesAmount, StringFormat=Файлов: {0}}" />
-                <Separator />
-                <TextBlock Text="{CompiledBinding FilesystemEntriesAmount, StringFormat=Всего: {0}}" />
-            </StackPanel>
-        </Border>
-
-        <ScrollViewer>
-            <ItemsControl ItemsSource="{CompiledBinding FileSystemEntries}">
-
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <ContentControl Content="{CompiledBinding}">
-                            <ContentControl.DataTemplates>
-
-                                <!-- Directory Template -->
-                                <DataTemplate DataType="{x:Type models:Directory}">
-                                    <StackPanel Margin="5">
-                                        <Border Tag="{CompiledBinding}" Background="LightYellow" BorderBrush="Gold" BorderThickness="8" CornerRadius="8" Padding="10" Width="128" Height="128" PointerPressed="InputElement_OnPointerPressed">
-                                            <ItemsControl ItemsSource="{CompiledBinding Images}">
-                                                <ItemsControl.ItemsPanel>
-                                                    <ItemsPanelTemplate>
-                                                        <UniformGrid Columns="2" Rows="2" />
-                                                    </ItemsPanelTemplate>
-                                                </ItemsControl.ItemsPanel>
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Image Source="{CompiledBinding}" Stretch="UniformToFill" RenderOptions.BitmapInterpolationMode="HighQuality" />
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </Border>
-                                        <TextBlock MaxWidth="128" Text="{CompiledBinding Info.Name}" HorizontalAlignment="Center" />
-                                    </StackPanel>
-                                </DataTemplate>
-
-                                <!-- File Template -->
-                                <DataTemplate DataType="{x:Type sys:FileInfo}">
-                                    <StackPanel Margin="5">
-                                        <Image Source="/Assets/file_icon.png" Width="128" Height="128" />
-                                        <TextBlock MaxWidth="128" Text="{CompiledBinding Name}" HorizontalAlignment="Center" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ContentControl.DataTemplates>
-                        </ContentControl>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-
-    </DockPanel>
 </Window>

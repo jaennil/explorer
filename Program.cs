@@ -2,7 +2,7 @@
 using Avalonia.ReactiveUI;
 using System;
 
-namespace explorer;
+namespace explorer_async;
 
 sealed class Program
 {
