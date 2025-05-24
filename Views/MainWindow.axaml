@@ -15,15 +15,20 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <ListBox ItemsSource="{CompiledBinding Files}" Margin="5">
-        <ListBox.ItemTemplate>
+    <ItemsControl ItemsSource="{CompiledBinding Files}">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <WrapPanel />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
             <DataTemplate>
-                <StackPanel Orientation="Horizontal" Spacing="5">
-                    <Image Source="/Assets/avalonia-logo.ico" Width="64" Height="64"/>
-                    <TextBlock Text="{CompiledBinding}" VerticalAlignment="Center"/>
+                <StackPanel>
+                    <Image Source="/Assets/avalonia-logo.ico" Width="64" Height="64" />
+                    <TextBlock Text="{CompiledBinding}" />
                 </StackPanel>
             </DataTemplate>
-        </ListBox.ItemTemplate>
-    </ListBox>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
 
 </Window>

@@ -2,6 +2,7 @@
 using DynamicData;
 using System.Reactive;
 using System;
+using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using explorer_async.Services;
 using System.Threading.Tasks;
@@ -19,19 +20,26 @@ public class MainWindowViewModel : ViewModelBase
         _path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         LoadFilesCommand = ReactiveCommand.CreateFromTask(LoadFilesAsync);
         LoadFilesCommand.Execute().Subscribe();
-        Files.CountChanged
+        
+        _filesSource.Connect()
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(count => Console.WriteLine($"{count}"));
+            .Bind(out _files)
+            .DisposeMany()
+            .Subscribe();
+        _filesSource.CountChanged
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(count => Console.WriteLine($" Loaded {count} files"));
     }
 
-    private SourceList<string> _files = new();
-    public IObservableList<string> Files => _files.AsObservableList();
+    private SourceList<string> _filesSource = new();
+    public ReadOnlyObservableCollection<string> Files => _files;
+    private ReadOnlyObservableCollection<string> _files;
     public ReactiveCommand<Unit, Unit> LoadFilesCommand;
 
     private async Task LoadFilesAsync()
     {
         var filePaths = await _fileSystemService.EnumerateFilesAsync(_path);
-        _files.Edit(innerList =>
+        _filesSource.Edit(innerList =>
         {
             innerList.Clear();
             innerList.AddRange(filePaths);
