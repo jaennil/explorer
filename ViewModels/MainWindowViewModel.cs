@@ -2,10 +2,12 @@
 using DynamicData;
 using System.Reactive;
 using System;
+using System.IO;
 using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using explorer_async.Services;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 
 namespace explorer_async.ViewModels;
 
@@ -13,6 +15,8 @@ public class MainWindowViewModel : ViewModelBase
 {
     private FileSystemService _fileSystemService;
     private string _path;
+    private SourceList<FileInfo> _filesSource = new();
+    private ReadOnlyObservableCollection<FileInfo> _files;
 
     public MainWindowViewModel(FileSystemService fileSystemService)
     {
@@ -26,19 +30,21 @@ public class MainWindowViewModel : ViewModelBase
             .Bind(out _files)
             .DisposeMany()
             .Subscribe();
+
         _filesSource.CountChanged
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(count => Console.WriteLine($" Loaded {count} files"));
     }
 
-    private SourceList<string> _filesSource = new();
-    public ReadOnlyObservableCollection<string> Files => _files;
-    private ReadOnlyObservableCollection<string> _files;
+    public ReadOnlyObservableCollection<FileInfo> Files => _files;
     public ReactiveCommand<Unit, Unit> LoadFilesCommand;
 
     private async Task LoadFilesAsync()
     {
-        var filePaths = await _fileSystemService.EnumerateFilesAsync(_path);
+        var filePaths = await _fileSystemService.ListFilesAsync(_path);
+        // var topLevel = TopLevel.GetTopLevel
+        // var storageProvider = TopLevel.StorageProvider;
+        // var filePaths = await 
         _filesSource.Edit(innerList =>
         {
             innerList.Clear();

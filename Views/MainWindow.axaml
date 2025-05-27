@@ -25,7 +25,7 @@
             <DataTemplate>
                 <StackPanel>
                     <Image Source="/Assets/avalonia-logo.ico" Width="64" Height="64" />
-                    <TextBlock Text="{CompiledBinding}" />
+                    <TextBlock Text="{CompiledBinding Name}" MaxWidth="64" />
                 </StackPanel>
             </DataTemplate>
         </ItemsControl.ItemTemplate>
