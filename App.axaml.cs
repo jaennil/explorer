@@ -18,6 +18,7 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var fileSystemService = new Services.FileSystemService();
+
             desktop.MainWindow = new MainWindow
             {
                 DataContext = new MainWindowViewModel(fileSystemService),
