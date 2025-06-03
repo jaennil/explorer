@@ -1,10 +1,8 @@
 using Avalonia.Controls;
-using Avalonia.ReactiveUI;
-using explorer_async.ViewModels;
 
-namespace explorer_async.Views;
+namespace explorer.Views;
 
-public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
+public partial class MainWindow : Window
 {
     public MainWindow()
     {
