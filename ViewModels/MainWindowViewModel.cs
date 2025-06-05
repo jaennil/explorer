@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
+using CommunityToolkit.Mvvm.Input;
 using Serilog;
 
 namespace explorer.ViewModels;
@@ -8,28 +10,40 @@ namespace explorer.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     public ObservableCollection<IStorageItem> StorageItems { get; } = [];
+    public IAsyncRelayCommand GoToDirectoryCommand { get; }
 
-    public MainWindowViewModel(IStorageProvider storageProvider)
+    private FileSystemService _fileSystemService;
+    private IStorageFolder _currentFolder;
+
+    public MainWindowViewModel(FileSystemService fileSystemService)
     {
-        _storageProvider = storageProvider;
+        Log.Debug("MainWindowViewModel constructor");
 
-        _currentPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        _fileSystemService = fileSystemService;
 
-        loadStorageItemsAsync();
+        string homeDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+
+
+        loadStorageItemsAsync(homeDirectoryPath);
     }
 
-    private async void loadStorageItemsAsync()
+    private async Task loadStorageItemsAsync(string directoryPath)
     {
-        var dir = await _storageProvider.TryGetFolderFromPathAsync(_currentPath);
-        Log.Debug(dir.Path.ToString());
-        var items = dir.GetItemsAsync();
+        Log.Debug("loadStorageItemsAsync");
+
+        var items = await _fileSystemService.EnumerateItemsAsync(directoryPath);
+
         await foreach (var item in items)
         {
             StorageItems.Add(item);
-            Log.Debug(item.Name);
         }
     }
 
-    private IStorageProvider _storageProvider;
-    private string _currentPath;
+    private async Task goToDirectoryAsync()
+    {
+        Log.Debug("goToDirectoryAsync");
+
+
+    }
 }

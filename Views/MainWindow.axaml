@@ -3,6 +3,7 @@
         xmlns:vm="using:explorer.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:s="using:Avalonia.Platform.Storage"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="explorer.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -13,23 +14,42 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <ItemsControl ItemsSource="{Binding StorageItems, Mode=OneWay}">
+    <ScrollViewer>
+        <ItemsControl ItemsSource="{Binding StorageItems, Mode=OneWay}">
 
-        <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-                <WrapPanel />
-            </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
 
-        <ItemsControl.ItemTemplate>
-            <DataTemplate>
-                <StackPanel>
-                    <Image Source="/Assets/avalonia-logo.ico" MaxWidth="64" MaxHeight="64" />
-                    <TextBlock Text="{Binding Name}" MaxWidth="64" />
-                </StackPanel>
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <ContentControl Content="{Binding}">
+                        <ContentControl.DataTemplates>
 
-    </ItemsControl>
+                            <DataTemplate DataType="{x:Type s:IStorageFile}">
+                                <StackPanel>
+                                    <Image Source="/Assets/avalonia-logo.ico" MaxWidth="128" MaxHeight="128" />
+                                    <TextBlock Text="{Binding Name}" MaxWidth="128" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type s:IStorageFolder}">
+                                <Button Background="White" Command="{Binding GoToDirectoryCommand}">
+                                    <StackPanel>
+                                        <Border BorderBrush="Gold" BorderThickness="8" Width="128" Height="128" />
+                                        <TextBlock Text="{Binding Name}" MaxWidth="128" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+
+                        </ContentControl.DataTemplates>
+                    </ContentControl>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+
+        </ItemsControl>
+    </ScrollViewer>
 
 </Window>

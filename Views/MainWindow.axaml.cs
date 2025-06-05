@@ -9,6 +9,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        DataContext = new MainWindowViewModel(this.StorageProvider);
+        var fileSystemService = new FileSystemService(this.StorageProvider);
+
+        DataContext = new MainWindowViewModel(fileSystemService);
     }
 }
