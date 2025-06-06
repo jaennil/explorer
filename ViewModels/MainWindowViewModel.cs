@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Serilog;
 
@@ -9,11 +10,10 @@ namespace explorer.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    public ObservableCollection<IStorageItem> StorageItems { get; } = [];
-    public IAsyncRelayCommand GoToDirectoryCommand { get; }
+    [ObservableProperty]
+    private ObservableCollection<IStorageItem> _storageItems = [];
 
     private FileSystemService _fileSystemService;
-    private IStorageFolder _currentFolder;
 
     public MainWindowViewModel(FileSystemService fileSystemService)
     {
@@ -21,29 +21,35 @@ public partial class MainWindowViewModel : ViewModelBase
 
         _fileSystemService = fileSystemService;
 
-        string homeDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
-
-
-        loadStorageItemsAsync(homeDirectoryPath);
+        init();
     }
 
-    private async Task loadStorageItemsAsync(string directoryPath)
+    private async Task init()
     {
-        Log.Debug("loadStorageItemsAsync");
+        string homeDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-        var items = await _fileSystemService.EnumerateItemsAsync(directoryPath);
+        var dir = await _fileSystemService.GetDirectoryFromPathAsync(homeDirectoryPath);
+        if (dir == null)
+        {
+            Log.Error("cant find directory {homeDirectoryPath}", homeDirectoryPath);
+            return;
+        }
+
+        await GoToDirectoryAsync(dir);
+    }
+
+    [RelayCommand]
+    public async Task GoToDirectoryAsync(IStorageFolder folder)
+    {
+        Log.Debug("GoToDirectoryAsync {folder.Path}", folder.Path);
+
+        _storageItems.Clear();
+
+        var items = await _fileSystemService.EnumerateItemsAsync(folder);
 
         await foreach (var item in items)
         {
-            StorageItems.Add(item);
+            _storageItems.Add(item);
         }
-    }
-
-    private async Task goToDirectoryAsync()
-    {
-        Log.Debug("goToDirectoryAsync");
-
-
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Avalonia;
 using System;
-using Avalonia.Logging;
 
 namespace explorer;
 
@@ -19,6 +18,6 @@ sealed class Program
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
-            .WithInterFont()
-            .LogToTrace(LogEventLevel.Verbose);
+            .WithInterFont();
+            // .LogToTrace(LogEventLevel.Verbose);
 }

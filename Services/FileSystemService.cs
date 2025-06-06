@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
+using Serilog;
 
 public class FileSystemService
 {
@@ -14,6 +15,8 @@ public class FileSystemService
 
     public async Task<IAsyncEnumerable<IStorageItem>> EnumerateItemsAsync(string directoryPath)
     {
+        Log.Debug("EnumerateItemsAsync Path {directoryPath}", directoryPath);
+
         var dir = await GetDirectoryFromPathAsync(directoryPath);
         if (dir == null)
         {
@@ -22,8 +25,17 @@ public class FileSystemService
         return dir.GetItemsAsync();
     }
 
+    public async Task<IAsyncEnumerable<IStorageItem>> EnumerateItemsAsync(IStorageFolder folder)
+    {
+        Log.Debug("EnumerateItemsAsync Folder {folder.Path}", folder.Path);
+
+        return folder.GetItemsAsync();
+    }
+
     public async Task<IStorageFolder?> GetDirectoryFromPathAsync(string directoryPath)
     {
+        Log.Debug("GetDirectoryFromPathAsync {directoryPath}", directoryPath);
+
         var dir = await _storageProvider.TryGetFolderFromPathAsync(directoryPath);
         return dir;
     }

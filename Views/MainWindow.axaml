@@ -1,21 +1,23 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:explorer.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:s="using:Avalonia.Platform.Storage"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="explorer.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="explorer">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:explorer.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:s="using:Avalonia.Platform.Storage"
+    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+    x:Class="explorer.Views.MainWindow"
+    x:DataType="vm:MainWindowViewModel"
+    Icon="/Assets/avalonia-logo.ico"
+    Title="explorer">
 
     <Design.DataContext>
-        <vm:MainWindowViewModel/>
+      <vm:MainWindowViewModel />
     </Design.DataContext>
 
     <ScrollViewer>
-        <ItemsControl ItemsSource="{Binding StorageItems, Mode=OneWay}">
+        <ItemsControl
+            x:Name="StorageItems"
+            ItemsSource="{Binding StorageItems, Mode=OneWay}">
 
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -30,16 +32,22 @@
 
                             <DataTemplate DataType="{x:Type s:IStorageFile}">
                                 <StackPanel>
-                                    <Image Source="/Assets/avalonia-logo.ico" MaxWidth="128" MaxHeight="128" />
-                                    <TextBlock Text="{Binding Name}" MaxWidth="128" HorizontalAlignment="Center" />
+                                    <Image Source="/Assets/avalonia-logo.ico" MaxWidth="128"
+                                        MaxHeight="128" />
+                                    <TextBlock Text="{Binding Name}" MaxWidth="128"
+                                        HorizontalAlignment="Center" />
                                 </StackPanel>
                             </DataTemplate>
 
                             <DataTemplate DataType="{x:Type s:IStorageFolder}">
-                                <Button Background="White" Command="{Binding GoToDirectoryCommand}">
+                                <Button Background="White"
+                                    Command="{Binding DataContext.GoToDirectoryAsync, ElementName=StorageItems}"
+                                    CommandParameter="{Binding}">
                                     <StackPanel>
-                                        <Border BorderBrush="Gold" BorderThickness="8" Width="128" Height="128" />
-                                        <TextBlock Text="{Binding Name}" MaxWidth="128" HorizontalAlignment="Center" />
+                                        <Border BorderBrush="Gold" BorderThickness="8" Width="128"
+                                            Height="128" />
+                                        <TextBlock Text="{Binding Name}" MaxWidth="128"
+                                            HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Button>
                             </DataTemplate>
